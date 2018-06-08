@@ -24,7 +24,7 @@ SIZE		= arm-none-eabi-size
 
 # https://gcc.gnu.org/onlinedocs/gcc/ARM-Options.html
 COMP_OPT	= 
-COMP_FLAGS	= -Wall -pedantic -funsigned-char -mcpu=$(CPU)
+COMP_FLAGS	= -g -std=c11 -Wall -pedantic -funsigned-char -mcpu=$(CPU)
 LINK_OPT	= 
 LINK_FLAGS	= -nostdlib -nostartfiles
 AS_FLAGS	= --warn --fatal-warnings -mcpu=$(CPU)
@@ -72,21 +72,6 @@ all: makedirs $(DISTDIR)/$(PROGNAME).hex
 clean:
 	@rm -rf $(DISTDIR)/*
 	@rm -rf $(OBJDIR)/*
-
-# Upload program using the serial STK500 (used by Arduino bootloaders)
-.PHONY: stk500_upload
-stk500_upload: $(DISTDIR)/$(PROGNAME).hex
-	avrdude -carduino -p$(TARGET) -P$(PROG_PORT) -b$(PROG_RATE) -Uflash:w:$<
-
-# Upload program using ISP (AVR Dragon)
-.PHONY: isp_upload
-isp_upload: $(DISTDIR)/$(PROGNAME).hex
-	avrdude -cdragon_isp -p$(TARGET) -P$(ISP_IF) -Uflash:w:$<
-
-# Set fuses iusing ISP (AVR Dragon)
-.PHONY: isp_fuses
-isp_fuses:
-	avrdude -cdragon_isp -p$(TARGET) -P$(ISP_IF) -U lfuse:w:$(LFUSE):m -U hfuse:w:$(HFUSE):m -U efuse:w:$(EFUSE):m
 
 # Transform to hex
 $(DISTDIR)/$(PROGNAME).hex: $(DISTDIR)/$(PROGNAME).elf

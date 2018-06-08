@@ -8,7 +8,7 @@ ITCM-ram: high perf code
 
 MEMORY
 {
-    flashaxim   : ORIGIN = 0x08080000, LENGTH = 2M
+    flashaxim   : ORIGIN = 0x08000000, LENGTH = 2M
     flashitcm   : ORIGIN = 0x00200000, LENGTH = 2M
     sram1       : ORIGIN = 0x20020000, LENGTH = 368K
     sram2       : ORIGIN = 0x2007C000, LENGTH = 16K
@@ -33,11 +33,26 @@ _stack_end      = _stack_start - stack_size;
 SECTIONS
 {
     .text : { 
-        */init.o (sp_pc)
-        */init.o (interrupt_handlers)
-        */init.o (.text) 
-        *(.text)
-
+        */init.o (.text);
+        *(.text);
     } > flashaxim
+
+    .rodata : { 
+        *(.rodata*);
+        _rodata_end = . ;
+    } > flashaxim
+
+    .bss_img : AT(_rodata_end) {
+        _bss_start = . ;
+        *(.bss*);
+        _bss_end = . ;
+    } > dtcm
+
+    .data : {
+        _data_rom_start = LOADADDR(.data);
+        _data_ram_start = . ;
+        *(.data)
+        _data_ram_end = . ;
+    } > dtcm
 }
 
